@@ -13,11 +13,11 @@ class MetaRecommendation(BaseModel):
     reason : str
 
 class HeadingRecommendation(BaseModel):
-    page_url:str
-    current_h1 : str |None=None
-    recommended_h1:str
-    recommended_h1:list[str] = Field(default_factory=list)
-    reason : str
+    page_url: str
+    current_h1: str | None = None
+    recommended_h1: str
+    recommended_h2: list[str] = Field(default_factory=list)
+    reason: str
 
 class InternalLinkRecommendation(BaseModel):
     page_url: str
