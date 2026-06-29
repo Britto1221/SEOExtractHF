@@ -93,7 +93,8 @@ if st.button("▶ run audit"):
     )
     audit_result = state["audit_result"]
     recommendations = state["recommendations"]
-
+    priority = state.get("priority", {})
+    triage = state.get("triage", {})
     st.markdown("## Audit Summary")
 
     summary = f"""$ seoextract audit {url}
@@ -122,7 +123,23 @@ safe_browsing   : {audit_result.safe_browsing.is_safe}
         st.code(issues_text, language="text")
     else:
         st.code("No SEO issues detected.", language="text")
+    st.markdown("## Issue Priority")
 
+    priority_text = ""
+
+    for level, issues in priority.items():
+        priority_text += f"{level.upper()} PRIORITY\n"
+
+        if not issues:
+            priority_text += "No issues\n\n"
+            continue
+
+        for issue in issues:
+            priority_text += f"- {issue.issue_type.value} ({issue.severity.value})\n"
+
+        priority_text += "\n"
+
+    st.code(priority_text, language="text")
     st.markdown("## AI Recommendations")
 
     st.markdown("### Overall Summary")

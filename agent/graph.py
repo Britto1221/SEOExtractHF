@@ -17,6 +17,7 @@ class SEOAgentState(TypedDict):
     audit_result: object
     recommendations: object
     triage: dict
+    priority: dict
 
 
 def audit_node(state: SEOAgentState):
@@ -70,16 +71,38 @@ def triage_node(state: SEOAgentState):
             triage["security"].append(issue)
 
     return {"triage": triage}
+def priority_node(state: SEOAgentState):
+    audit = state["audit_result"]
+
+    priority = {
+        "high": [],
+        "medium": [],
+        "low": [],
+    }
+
+    for issue in audit.issues:
+        severity = issue.severity.value
+
+        if severity == "CRITICAL":
+            priority["high"].append(issue)
+        elif severity == "WARNING":
+            priority["medium"].append(issue)
+        else:
+            priority["low"].append(issue)
+
+    return {"priority": priority}
 
 builder = StateGraph(SEOAgentState)
 
 builder.add_node("audit", audit_node)
 builder.add_node("recommend", recommendation_node)
 builder.add_node("triage", triage_node)
+builder.add_node("priority", priority_node)
 
 builder.add_edge(START, "audit")
 builder.add_edge("audit", "triage")
-builder.add_edge("triage", "recommend")
+builder.add_edge("triage", "priority")
+builder.add_edge("priority", "recommend")
 builder.add_edge("recommend", END)
 
 seo_graph = builder.compile()
