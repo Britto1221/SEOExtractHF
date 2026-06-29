@@ -1,6 +1,6 @@
 import streamlit as st
 from seoextract import SEOExtract
-
+from agent.graph import seo_graph
 from config import MAX_PAGES, GOOGLE_SAFE_BROWSING_API_KEY
 from agent.recommender import generate_recommendations
 
@@ -83,12 +83,16 @@ if st.button("▶ run audit"):
         st.stop()
 
     st.markdown('<div class="terminal-box">Running SEOExtract.audit()...</div>', unsafe_allow_html=True)
-
-    audit_result = SEOExtract.audit(
-        url,
-        max_pages=MAX_PAGES,
-        safe_browsing_api_key=GOOGLE_SAFE_BROWSING_API_KEY,
+    state = seo_graph.invoke(
+    {
+        "url": url,
+        "business_domain": business_domain,
+        "target_audience": target_audience,
+        "target_keyword": target_keyword,
+    }
     )
+    audit_result = state["audit_result"]
+    recommendations = state["recommendations"]
 
     st.markdown("## Audit Summary")
 
@@ -120,13 +124,6 @@ safe_browsing   : {audit_result.safe_browsing.is_safe}
         st.code("No SEO issues detected.", language="text")
 
     st.markdown("## AI Recommendations")
-
-    recommendations = generate_recommendations(
-        audit_result,
-        business_domain=business_domain,
-        target_audience=target_audience,
-        target_keyword=target_keyword,
-    )
 
     st.markdown("### Overall Summary")
     st.code(recommendations.overall_summary, language="text")
